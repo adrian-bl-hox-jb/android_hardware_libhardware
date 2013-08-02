@@ -60,7 +60,6 @@ __BEGIN_DECLS
 #define AUDIO_DEVICE_API_VERSION_CURRENT AUDIO_DEVICE_API_VERSION_1_0
 #endif
 
-
 /**
  * List of known audio HAL modules. This is the base name of the audio HAL
  * library composed of the "audio." prefix, one of the base names below and
@@ -257,12 +256,58 @@ struct audio_stream_out {
     int (*get_render_position)(const struct audio_stream_out *stream,
                                uint32_t *dsp_frames);
 
+#ifdef QCOM_HARDWARE
+    /**
+     * start audio data rendering
+     */
+    int (*start)(struct audio_stream_out *stream);
+
+    /**
+     * pause audio rendering
+     */
+    int (*pause)(struct audio_stream_out *stream);
+
+    /**
+     * flush audio data with driver
+     */
+    int (*flush)(struct audio_stream_out *stream);
+
+    /**
+     * stop audio data rendering
+     */
+    int (*stop)(struct audio_stream_out *stream);
+#endif
+
     /**
      * get the local time at which the next write to the audio driver will be presented.
      * The units are microseconds, where the epoch is decided by the local audio HAL.
      */
     int (*get_next_write_timestamp)(const struct audio_stream_out *stream,
                                     int64_t *timestamp);
+#ifdef QCOM_HARDWARE
+    /**
+    * return the current timestamp after quering to the driver
+     */
+    int (*get_time_stamp)(const struct audio_stream_out *stream,
+                               uint64_t *time_stamp);
+    /**
+    * EOS notification from HAL to Player
+     */
+    int (*set_observer)(const struct audio_stream_out *stream,
+                               void *observer);
+    /**
+     * Get the physical address of the buffer allocated in the
+     * driver
+     */
+    int (*get_buffer_info) (const struct audio_stream_out *stream,
+                                struct buf_info **buf);
+    /**
+     * Check if next buffer is available. Waits until next buffer is
+     * available
+     */
+    int (*is_buffer_available) (const struct audio_stream_out *stream,
+                                     int *isAvail);
+#endif
 
 };
 typedef struct audio_stream_out audio_stream_out_t;
